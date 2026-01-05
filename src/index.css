@@ -1,13 +1,28 @@
 @import "tailwindcss";
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Sora", sans-serif;;
+:root {
+  /* Neutral */
+  --neutral-900: #121212;
+  --neutral-800: #262626;
+  --neutral-700: #3A3A3A;
+  --neutral-500: #717178;
+  --neutral-400: #949497;
+  --neutral-0: #FFF;
+
+  /* Blue */
+  --blue-600: #177DFF;
+  --blue-400: #4CA6FF;
+
+  /* Red */
+  --red-500: #D64D5B;
+
+  /* Green */
+  --green-500: #4DD67B;
+
+  /* Yellow */
+  --yellow-400: #F4DC73;
 }
 
 body {
-  min-height: 100vh;
-  width: 100vw;
+  font-family: "Sora", sans-serif;
 }

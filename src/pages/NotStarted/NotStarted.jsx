@@ -1,9 +1,7 @@
-import './NotStarted.css'
-
 function NotStarted() {
 
   return (
-    <div className=''>
+    <div className='text-red-500'>
       Oi, cara
     </div>
   )
