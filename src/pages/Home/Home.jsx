@@ -1,8 +1,7 @@
-import logoLarge from '../../assets/images/logo-large.svg';
-import iconPersonalBest from '../../assets/images/icon-personal-best.svg'
 import iconRestart from '../../assets/images/icon-restart.svg'
 import { useState } from 'react';
 import NotStarted from '../NotStarted/NotStarted'
+import Header from '../../components/Header';
 
 function Home() {
   const [itStarted, setItStarted] = useState(false);
@@ -13,13 +12,7 @@ function Home() {
 
   return(
     <div className="flex flex-col items-center px-28 py-8 bg-(--neutral-900) min-h-screen gap-9">
-      <div className="flex w-full justify-between items-center">
-        <img src={logoLarge} alt="" className='w-66.75 h-10' />
-        <div className='flex items-center gap-2.5'>
-          <img src={iconPersonalBest} alt="" className='w-[20.25px] h-4.5' />
-          <p className='text-[18px] leading-[120%] tracking-[-0.6px] text-(--neutral-400)'>Personal best: <span className='text-(--neutral-0)'>92 WPM</span></p>
-        </div>
-      </div>
+      <Header></Header>
       <div className='flex flex-col w-full gap-6'>
         <div className='flex justify-between items-center pb-3 border-b border-(--neutral-700)'>
           <div className='flex h-6 gap-4'>
