@@ -16,7 +16,7 @@ function HighScoreSmashed() {
           isHighScore={true}
         />
       </div>
-      <img src={patternConfetti} alt="" className="fixed -bottom-35 z-1 w-screen object-cover" />
+      <img src={patternConfetti} alt="" className="fixed bottom-0 z-1 w-screen object-cover" />
     </div>
   );
 }

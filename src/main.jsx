@@ -4,9 +4,10 @@ import './index.css'
 import Home from './pages/Home/Home'
 import TestComplete from './pages/TestComplete/TestComplete'
 import HighScoreSmashed from './pages/HighScoreSmashed/HighScoreSmashed'
+import BaselineEstabilished from './pages/BaselineEstabilished/BaselineEstabilished'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <HighScoreSmashed />
+    <Home />
   </StrictMode>,
 )
