@@ -12,7 +12,7 @@ function Home() {
 
   return(
     <div className="flex flex-col items-center px-28 py-8 bg-(--neutral-900) min-h-screen gap-9">
-      <Header></Header>
+      <Header />
       <div className='flex flex-col w-full gap-6'>
         <div className='flex justify-between items-center pb-3 border-b border-(--neutral-700)'>
           <div className='flex h-6 gap-4'>
