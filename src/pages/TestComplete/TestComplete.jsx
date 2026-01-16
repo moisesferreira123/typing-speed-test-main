@@ -3,8 +3,15 @@ import Result from "../../components/Result";
 import iconCompleted from "../../assets/images/icon-completed.svg";
 import patternStar1 from "../../assets/images/pattern-star-1.svg";
 import patternStar2 from "../../assets/images/pattern-star-2.svg";
+import { useSearchParams } from "react-router-dom";
 
 function TestComplete() {
+  const [searchParams] = useSearchParams();
+  const wpm = searchParams.get('wpm');
+  const accuracy = searchParams.get('accuracy');
+  const correctedCharacters = searchParams.get('correctedCharacters');
+  const incorrectedCharacters = searchParams.get('incorrectedCharacters');
+  
   return(
     <div className="flex flex-col items-center px-28 py-8 bg-(--neutral-900) min-h-screen gap-13">
       <Header />
@@ -14,7 +21,10 @@ function TestComplete() {
           title={"Test Complete!"} 
           subtitle={"Solid run. Keep pushing to beat your high score."} 
           textButton={"Go Again"}
-          isHighScore={false}
+          wpm={wpm}
+          accuracy={accuracy}
+          correctedCharacters={correctedCharacters}
+          incorrectedCharacters={incorrectedCharacters}
         />
       </div>
       <img src={patternStar1} alt="" className="fixed left-[calc(100vw*0.87)] top-115 " />

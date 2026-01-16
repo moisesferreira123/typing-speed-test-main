@@ -2,6 +2,7 @@ import iconRestart from '../../assets/images/icon-restart-white.svg'
 import { useEffect, useState } from 'react';
 import NotStarted from '../NotStarted/NotStarted'
 import Header from '../../components/Header';
+import { useNavigate } from 'react-router-dom';
 
 function Home() {
   const [itStarted, setItStarted] = useState(false);
@@ -11,8 +12,12 @@ function Home() {
   const [wpm, setWpm] = useState(0);
   const [accuracy, setAccuracy] = useState(0);
   const [time, setTime] = useState(60);
-  const [wrongLetters, setWrongLetters] = useState(0);
+  const [wrongCharactersUncorrected, setWrongCharactersUncorrected] = useState(0);
+  const [typedCharacters, setTypedCharacters] = useState(0);
+  const [wrongCharactersTotal, setWrongCharactersTotal] = useState(0);
 
+  const navigate = useNavigate();
+  
   function startTyping() {
     setItStarted(true);
   }
@@ -34,9 +39,28 @@ function Home() {
   }, [itStarted, time]);
 
   useEffect(() => {
-    console.log(typedText.length, wrongLetters)
-    setWpm(Math.floor((typedText.length-wrongLetters)/5));
-  }, [typedText, wrongLetters]);
+    setWpm(Math.floor((typedText.length-wrongCharactersUncorrected)/5));
+  }, [typedText, wrongCharactersUncorrected]);
+
+  useEffect(() => {
+    setAccuracy(() => {
+      console.log(typedCharacters, wrongCharactersTotal)
+      if(typedCharacters === 0) return 0;
+      return Math.floor(((typedCharacters-wrongCharactersTotal)/typedCharacters)*100);
+    });
+  }, [typedCharacters, wrongCharactersTotal]);
+
+  useEffect(() => {
+    // TODO: Preciso verificar se é recorde ou primeira vez
+    if(itStarted && time === 0) {
+      const query = new URLSearchParams();
+      query.set('wpm', wpm);
+      query.set('accuracy', accuracy);
+      query.set('correctedCharacters', typedCharacters-wrongCharactersTotal);
+      query.set('incorrectedCharacters', wrongCharactersTotal);
+      navigate(`/test-complete?${query.toString()}`);
+    }
+  }, [itStarted, time, wpm, accuracy, typedCharacters, wrongCharactersTotal, navigate]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -46,9 +70,9 @@ function Home() {
 
       if(e.key === "Backspace")  {
         setTypedText(typedText => typedText.slice(0, -1));
-        setWrongLetters(wrongLetters => {
-          if(typedText[typedText.length-1] !== text[typedText.length-1]) return wrongLetters-1;
-          return wrongLetters;
+        setWrongCharactersUncorrected(wrongCharactersUncorrected => {
+          if(typedText[typedText.length-1] !== text[typedText.length-1]) return wrongCharactersUncorrected-1;
+          return wrongCharactersUncorrected;
         });
         setCharIndex(charIndex => {
           if(charIndex>0) return charIndex-1;
@@ -56,10 +80,15 @@ function Home() {
         });
       } else if(e.key !== "Shift" && e.key !== "CapsLock") {
         setTypedText(typedText => [...typedText, e.key]);
-        setWrongLetters(wrongLetters => {
-          if(e.key !== text[typedText.length]) return wrongLetters+1;
-          return wrongLetters;
+        setWrongCharactersUncorrected(wrongCharactersUncorrected => {
+          if(e.key !== text[typedText.length]) return wrongCharactersUncorrected+1;
+          return wrongCharactersUncorrected;
         });
+        setWrongCharactersTotal(wrongCharactersTotal => {
+          if(e.key !== text[typedText.length]) return wrongCharactersTotal+1;
+          return wrongCharactersTotal;
+        });
+        setTypedCharacters(typedCharacters => typedCharacters+1);
         setCharIndex(charIndex => charIndex+1);
       }
     };
@@ -77,7 +106,7 @@ function Home() {
           <div className='flex h-6 gap-4'>
             <p className='text-[20px] leading-[120%] tracking-[-0.6px] text-(--neutral-400)'>WPM:<span className='font-bold leading-[100%] tracking-[0%] text-[24px] text-(--neutral-0) ml-3'>{wpm}</span></p>
             <div className='w-px h-full bg-(--neutral-700)'></div>
-            <p className='text-[20px] leading-[120%] tracking-[-0.6px] text-(--neutral-400)'>Accuracy:<span className={`font-bold leading-[100%] tracking-[0%] text-[24px] ${itStarted? 'text-(--red-500)' : 'text-(--neutral-0)'} ml-3`}>94%</span></p>
+            <p className='text-[20px] leading-[120%] tracking-[-0.6px] text-(--neutral-400)'>Accuracy:<span className={`font-bold leading-[100%] tracking-[0%] text-[24px] ${itStarted? (accuracy >= 90 ? (accuracy >= 95 ? 'text-(--green-500)' : 'text-(--yellow-400)') : 'text-(--red-500)') : 'text-(--neutral-0)'} ml-3`}>{accuracy}%</span></p>
             <div className='w-px h-full bg-(--neutral-700)'></div>
             <p className='text-[20px] leading-[120%] tracking-[-0.6px] text-(--neutral-400)'>Time:<span className={`font-bold leading-[100%] tracking-[0%] text-[24px] ${itStarted? (time>=10 ? 'text-(--yellow-400)' : 'text-(--red-500)') : 'text-(--neutral-0)'} ml-3`}>{formatTime(time)}</span></p>
           </div>

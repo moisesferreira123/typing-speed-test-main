@@ -1,6 +1,6 @@
 import iconRestart from '../assets/images/icon-restart-neutral-900.svg';
 
-function Result({ title, subtitle, isHighScore, textButton }) {
+function Result({ title, subtitle, textButton, wpm, accuracy, correctedCharacters, incorrectedCharacters }) {
   return(
     <div className="flex flex-col items-center gap-8 ">
       <div className="pt-6 flex flex-col items-center gap-2.5">
@@ -10,15 +10,15 @@ function Result({ title, subtitle, isHighScore, textButton }) {
       <div className="pt-5 pb-8 flex justify-center items-center gap-5">
         <div className="px-6 py-4 flex flex-col items-start gap-3 rounded-lg border border-(--neutral-700) bg-(--neutral-900) w-40 ">
           <p className="text-(--neutral-400) text-[16px] leading-[120%] tracking-[-0.6px] ">WPM:</p>
-          <p className="font-bold text-(--neutral-0) text-[22px] leading-[100%] tracking-normal ">85</p>
+          <p className="font-bold text-(--neutral-0) text-[22px] leading-[100%] tracking-normal ">{wpm}</p>
         </div>
         <div className="px-6 py-4 flex flex-col items-start gap-3 rounded-lg border border-(--neutral-700) bg-(--neutral-900) w-40 ">
           <p className="text-(--neutral-400) text-[16px] leading-[120%] tracking-[-0.6px] ">Accuracy:</p>
-          <p className={`font-bold ${isHighScore ? 'text-(--green-500)' : 'text-(--red-500)'} text-[22px] leading-[100%] tracking-normal `}>90%</p>
+          <p className={`font-bold ${accuracy >= 90 ? (accuracy >= 95 ? 'text-(--green-500)' : 'text-(--yellow-400)') : 'text-(--red-500)' } text-[22px] leading-[100%] tracking-normal `}>{accuracy}%</p>
         </div>
         <div className="px-6 py-4 flex flex-col items-start gap-3 rounded-lg border border-(--neutral-700) bg-(--neutral-900) w-40 ">
           <p className="text-(--neutral-400) text-[16px] leading-[120%] tracking-[-0.6px] ">Characters</p>
-          <p className="font-bold text-(--neutral-500) text-[22px] leading-[100%] tracking-normal "><span className="text-(--green-500)">120</span>/<span className="text-(--red-500)">5</span></p>
+          <p className="font-bold text-(--neutral-500) text-[22px] leading-[100%] tracking-normal "><span className="text-(--green-500)">{correctedCharacters}</span>/<span className="text-(--red-500)">{incorrectedCharacters}</span></p>
         </div>
       </div>
       <div>
