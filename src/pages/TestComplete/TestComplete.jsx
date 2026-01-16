@@ -12,9 +12,11 @@ function TestComplete() {
   const correctedCharacters = searchParams.get('correctedCharacters');
   const incorrectedCharacters = searchParams.get('incorrectedCharacters');
   
+  const bestWpm = localStorage.getItem("bestWpm");
+
   return(
     <div className="flex flex-col items-center px-28 py-8 bg-(--neutral-900) min-h-screen gap-13">
-      <Header />
+      <Header bestWpm={bestWpm} />
       <div className="flex flex-col items-center gap-8">
         <img src={iconCompleted} alt="" className="w-16 h-16 ring-offset-16 ring-offset-(--green-500)/20 ring-16 ring-(--green-500)/10 rounded-full" />
         <Result 

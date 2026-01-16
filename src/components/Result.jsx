@@ -1,6 +1,13 @@
+import { useNavigate } from 'react-router-dom';
 import iconRestart from '../assets/images/icon-restart-neutral-900.svg';
 
 function Result({ title, subtitle, textButton, wpm, accuracy, correctedCharacters, incorrectedCharacters }) {
+  const navigate = useNavigate();
+
+  function goToHome() {
+    navigate('/');
+  }
+  
   return(
     <div className="flex flex-col items-center gap-8 ">
       <div className="pt-6 flex flex-col items-center gap-2.5">
@@ -22,7 +29,7 @@ function Result({ title, subtitle, textButton, wpm, accuracy, correctedCharacter
         </div>
       </div>
       <div>
-        <button className="flex justify-center items-center gap-2.5 px-4 py-3 bg-(--neutral-0) rounded-xl text-(--neutral-900) font-semibold hover:opacity-90 hover:cursor-pointer ">
+        <button onClick={goToHome} className="flex justify-center items-center gap-2.5 px-4 py-3 bg-(--neutral-0) rounded-xl text-(--neutral-900) font-semibold hover:opacity-90 hover:cursor-pointer ">
           <p className='text-[16px] leading-[120%] tracking-[-0.3px]'>{textButton}</p>
           <img src={iconRestart} alt="" className="w-5 h-5" />
         </button>

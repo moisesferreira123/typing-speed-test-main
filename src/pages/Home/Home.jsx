@@ -1,20 +1,25 @@
 import iconRestart from '../../assets/images/icon-restart-white.svg'
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import NotStarted from '../NotStarted/NotStarted'
 import Header from '../../components/Header';
 import { useNavigate } from 'react-router-dom';
 
 function Home() {
-  const [itStarted, setItStarted] = useState(false);
   const text = `The archaeological expedition unearthed artifacts that complicated prevailing theories about Bronze Age trade networks. Obsidian from Anatolia, lapis lazuli from Afghanistan, and amber from the Baltic—all discovered in a single Mycenaean tomb—suggested commercial connections far more extensive than previously hypothesized. "We've underestimated ancient peoples' navigational capabilities and their appetite for luxury goods," the lead researcher observed. "Globalization isn't as modern as we assume."`;
+  
+  const [itStarted, setItStarted] = useState(false);
   const [typedText, setTypedText] = useState([]);
   const [charIndex, setCharIndex] = useState(0);
   const [wpm, setWpm] = useState(0);
   const [accuracy, setAccuracy] = useState(0);
-  const [time, setTime] = useState(60);
+  const [chosenTime, setChosenTime] = useState(15);
+  const [time, setTime] = useState(15);
   const [wrongCharactersUncorrected, setWrongCharactersUncorrected] = useState(0);
   const [typedCharacters, setTypedCharacters] = useState(0);
   const [wrongCharactersTotal, setWrongCharactersTotal] = useState(0);
+  const [bestWpm, setBestWpm] = useState(localStorage.getItem("bestWpm") || 0);
+  
+  const changePage = useRef(true);
 
   const navigate = useNavigate();
   
@@ -39,8 +44,8 @@ function Home() {
   }, [itStarted, time]);
 
   useEffect(() => {
-    setWpm(Math.floor((typedText.length-wrongCharactersUncorrected)/5));
-  }, [typedText, wrongCharactersUncorrected]);
+    setWpm(Math.floor((typedText.length-wrongCharactersUncorrected)/5/(chosenTime/60)));
+  }, [typedText, wrongCharactersUncorrected, chosenTime]);
 
   useEffect(() => {
     setAccuracy(() => {
@@ -51,16 +56,30 @@ function Home() {
   }, [typedCharacters, wrongCharactersTotal]);
 
   useEffect(() => {
-    // TODO: Preciso verificar se é recorde ou primeira vez
-    if(itStarted && time === 0) {
+    if(itStarted && time === 0 && changePage.current) {
+      changePage.current = false;
+
       const query = new URLSearchParams();
       query.set('wpm', wpm);
       query.set('accuracy', accuracy);
       query.set('correctedCharacters', typedCharacters-wrongCharactersTotal);
       query.set('incorrectedCharacters', wrongCharactersTotal);
-      navigate(`/test-complete?${query.toString()}`);
+      
+      if(wpm > bestWpm) {
+        setBestWpm(wpm);
+        localStorage.setItem("bestWpm", wpm);
+        const isFirstTime = localStorage.getItem("isFirstTime") || "true";
+        if(isFirstTime === "true") {
+          localStorage.setItem("isFirstTime", "false");
+          navigate(`/baseline-estabilished?${query.toString()}`);
+        }
+        else navigate(`/high-score-smashed?${query.toString()}`);
+      } else {
+        navigate(`/test-complete?${query.toString()}`);
+      }
+
     }
-  }, [itStarted, time, wpm, accuracy, typedCharacters, wrongCharactersTotal, navigate]);
+  }, [itStarted, time, wpm, accuracy, typedCharacters, wrongCharactersTotal, bestWpm, navigate]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -100,7 +119,7 @@ function Home() {
 
   return(
     <div className="flex flex-col items-center px-28 py-8 bg-(--neutral-900) min-h-screen gap-9">
-      <Header />
+      <Header bestWpm={bestWpm} />
       <div className='flex flex-col w-full gap-6'>
         <div className='flex justify-between items-center pb-3 border-b border-(--neutral-700)'>
           <div className='flex h-6 gap-4'>
