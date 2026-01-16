@@ -5,19 +5,21 @@ import Header from '../../components/Header';
 import { useNavigate } from 'react-router-dom';
 
 function Home() {
-  const text = `The archaeological expedition unearthed artifacts that complicated prevailing theories about Bronze Age trade networks. Obsidian from Anatolia, lapis lazuli from Afghanistan, and amber from the Baltic—all discovered in a single Mycenaean tomb—suggested commercial connections far more extensive than previously hypothesized. "We've underestimated ancient peoples' navigational capabilities and their appetite for luxury goods," the lead researcher observed. "Globalization isn't as modern as we assume."`;
-  
   const [itStarted, setItStarted] = useState(false);
   const [typedText, setTypedText] = useState([]);
   const [charIndex, setCharIndex] = useState(0);
   const [wpm, setWpm] = useState(0);
   const [accuracy, setAccuracy] = useState(0);
+  // TODO: Trocar para 60
   const [chosenTime, setChosenTime] = useState(15);
   const [time, setTime] = useState(15);
+  // 
   const [wrongCharactersUncorrected, setWrongCharactersUncorrected] = useState(0);
   const [typedCharacters, setTypedCharacters] = useState(0);
   const [wrongCharactersTotal, setWrongCharactersTotal] = useState(0);
   const [bestWpm, setBestWpm] = useState(localStorage.getItem("bestWpm") || 0);
+  const [difficulty, setDifficulty] = useState(sessionStorage.getItem("difficulty") || "medium");
+  const [text, setText] = useState('');
   
   const changePage = useRef(true);
 
@@ -33,23 +35,54 @@ function Home() {
     return `${minute}:${sec<10 ? `0${sec}` : sec}`;
   }
 
+  function resetPage() {
+    setWpm(0);
+    setAccuracy(0);
+    setItStarted(false);
+    setTime(chosenTime);
+    setWrongCharactersTotal(0);
+    setWrongCharactersUncorrected(0);
+    setTypedText([]);
+    setTypedCharacters(0);
+    setCharIndex(0);
+  }
+
+  async function changeText() {
+    const response = await fetch('/data.json');
+    const data = await response.json();
+
+    let index = Math.floor(Math.random()*data[difficulty].length);
+    while(text === data[difficulty][index]["text"]){ 
+      index = Math.floor(Math.random()*data[difficulty].length);
+    }
+    setText(data[difficulty][index]["text"]);
+  }
+
+  async function restartTest() {
+    resetPage();
+    changeText();
+  }
+
+  useEffect(() => {
+    changeText();
+  }, [difficulty]);
+
   useEffect(() => {
     if(!itStarted || time <= 0) return;
 
-    setTimeout(() => {
+    const timeId = setTimeout(() => {
       setTime(time => time-1);
     }, 1000);
 
-    return () => clearTimeout(time);
+    return () => clearTimeout(timeId);
   }, [itStarted, time]);
 
   useEffect(() => {
-    setWpm(Math.floor((typedText.length-wrongCharactersUncorrected)/5/(chosenTime/60)));
+    setWpm(Math.floor(((typedText.length-wrongCharactersUncorrected)/5)/(chosenTime/60)));
   }, [typedText, wrongCharactersUncorrected, chosenTime]);
 
   useEffect(() => {
     setAccuracy(() => {
-      console.log(typedCharacters, wrongCharactersTotal)
       if(typedCharacters === 0) return 0;
       return Math.floor(((typedCharacters-wrongCharactersTotal)/typedCharacters)*100);
     });
@@ -160,7 +193,7 @@ function Home() {
         </div>
       </div>
       <div className={`pt-7 flex justify-center w-full border-t border-(--neutral-700) ${!itStarted && 'hidden'}`}>
-        <button className='flex justify-center items-center gap-2.5 bg-(--neutral-800) text-(--neutral-0) rounded-xl px-4 py-2.5 font-semibold hover:opacity-90 hover:cursor-pointer'>
+        <button onClick={restartTest} className='flex justify-center items-center gap-2.5 bg-(--neutral-800) text-(--neutral-0) rounded-xl px-4 py-2.5 font-semibold hover:opacity-90 hover:cursor-pointer'>
           <p className='leading-[120%] tracking-[-0.3px]'>Restart Test</p>
           <img src={iconRestart} alt="" className='w-4 h-4 text-(--neutral-0)' />
         </button>
