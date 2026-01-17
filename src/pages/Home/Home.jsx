@@ -1,5 +1,5 @@
 import iconRestart from '../../assets/images/icon-restart-white.svg'
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import NotStarted from '../NotStarted/NotStarted'
 import Header from '../../components/Header';
 import { useNavigate } from 'react-router-dom';
@@ -8,18 +8,37 @@ function Home() {
   const [itStarted, setItStarted] = useState(false);
   const [typedText, setTypedText] = useState([]);
   const [charIndex, setCharIndex] = useState(0);
-  const [wpm, setWpm] = useState(0);
-  const [accuracy, setAccuracy] = useState(0);
-  // TODO: Trocar para 60
-  const [chosenTime, setChosenTime] = useState(15);
-  const [time, setTime] = useState(15);
-  // 
+  const [chosenTime, setChosenTime] = useState(() => {
+    const mode = sessionStorage.getItem('mode');
+    if(!mode) return 60;
+    if(mode === "passage") return 0;
+    if(mode === "timed15") return 15;
+    if(mode === "timed30") return 30;
+    if(mode === "timed60") return 60;
+  });
+  const [time, setTime] = useState(60);
   const [wrongCharactersUncorrected, setWrongCharactersUncorrected] = useState(0);
   const [typedCharacters, setTypedCharacters] = useState(0);
   const [wrongCharactersTotal, setWrongCharactersTotal] = useState(0);
   const [bestWpm, setBestWpm] = useState(localStorage.getItem("bestWpm") || 0);
   const [difficulty, setDifficulty] = useState(sessionStorage.getItem("difficulty") || "medium");
+  const [mode, setMode] = useState(sessionStorage.getItem("mode") || "timed60");
   const [text, setText] = useState('');
+
+  const wpm = useMemo(() => {
+    if(mode ===  "passage") {
+      if(time === 0) return 0;
+      return Math.floor(((typedText.length-wrongCharactersUncorrected)/5)/(time/60));
+    } else {
+      if(chosenTime-time === 0) return 0;
+      return Math.floor(((typedText.length-wrongCharactersUncorrected)/5)/((chosenTime-time)/60));
+    }
+  }, [typedText, wrongCharactersUncorrected, chosenTime, time, mode]);
+
+  const accuracy = useMemo(() => {
+    if(typedCharacters === 0) return 0;
+    return Math.floor(((typedCharacters-wrongCharactersTotal)/typedCharacters)*100);
+  }, [typedCharacters, wrongCharactersTotal]);
   
   const changePage = useRef(true);
 
@@ -36,8 +55,6 @@ function Home() {
   }
 
   function resetPage() {
-    setWpm(0);
-    setAccuracy(0);
     setItStarted(false);
     setTime(chosenTime);
     setWrongCharactersTotal(0);
@@ -58,38 +75,51 @@ function Home() {
     setText(data[difficulty][index]["text"]);
   }
 
-  async function restartTest() {
+  function restartTest() {
     resetPage();
     changeText();
   }
 
-  useEffect(() => {
-    changeText();
-  }, [difficulty]);
+  function changeDifficulty(newDifficulty) {
+    sessionStorage.setItem("difficulty", newDifficulty);
+    setDifficulty(newDifficulty);
+  } 
+
+  function changeMode(newMode) {
+    sessionStorage.setItem("mode", newMode);
+    if(newMode === "passage") setChosenTime(0);
+    else setChosenTime(newMode.slice(-2));
+    setMode(newMode);
+  }
 
   useEffect(() => {
-    if(!itStarted || time <= 0) return;
+    restartTest();
+  }, [difficulty, mode]);
+
+  useEffect(() => {
+    if(!itStarted || time <= 0 || mode === "passage") return;
 
     const timeId = setTimeout(() => {
       setTime(time => time-1);
     }, 1000);
 
     return () => clearTimeout(timeId);
-  }, [itStarted, time]);
+  }, [itStarted, time, mode]);
 
   useEffect(() => {
-    setWpm(Math.floor(((typedText.length-wrongCharactersUncorrected)/5)/(chosenTime/60)));
-  }, [typedText, wrongCharactersUncorrected, chosenTime]);
+    if(!itStarted || mode !== "passage") return;
+
+    const timeId = setTimeout(() => {
+      setTime(time => time+1);
+    }, 1000);
+
+    return () => clearTimeout(timeId);
+  }, [itStarted, time, mode]);
 
   useEffect(() => {
-    setAccuracy(() => {
-      if(typedCharacters === 0) return 0;
-      return Math.floor(((typedCharacters-wrongCharactersTotal)/typedCharacters)*100);
-    });
-  }, [typedCharacters, wrongCharactersTotal]);
+    if(itStarted && (time === 0 || typedText.length === text.length) && changePage.current) {
+      if(mode === "passage" && time === 0) return;
 
-  useEffect(() => {
-    if(itStarted && time === 0 && changePage.current) {
       changePage.current = false;
 
       const query = new URLSearchParams();
@@ -112,7 +142,7 @@ function Home() {
       }
 
     }
-  }, [itStarted, time, wpm, accuracy, typedCharacters, wrongCharactersTotal, bestWpm, navigate]);
+  }, [itStarted, time, wpm, mode, accuracy, typedCharacters, wrongCharactersTotal, bestWpm, text, typedText, navigate]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -165,15 +195,15 @@ function Home() {
           <div className='flex h-7.75 gap-3'>
             <div className='flex gap-1.5 items-center'>
               <p className='pr-2 text-[16px] leading-[120%] tracking-[-0.48px] text-(--neutral-400)'>Difficulty:</p>
-              <button className='text-[16px] leading-[120%] tracking-[-0.48px] text-(--neutral-0) px-2.5 py-1.5 border rounded-lg border-(--neutral-500) hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer'>Easy</button>
-              <button className='text-[16px] leading-[120%] tracking-[-0.48px] text-(--neutral-0) px-2.5 py-1.5 border rounded-lg border-(--neutral-500) hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer'>Medium</button>
-              <button className='text-[16px] leading-[120%] tracking-[-0.48px] text-(--blue-400) px-2.5 py-1.5 border rounded-lg border-(--blue-400) hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer'>Hard</button>
+              <button onClick={() => changeDifficulty('easy')} className={`text-[16px] leading-[120%] tracking-[-0.48px] px-2.5 py-1.5 border rounded-lg ${difficulty === 'easy' ? 'border-(--blue-400) text-(--blue-400)' : 'border-(--neutral-500) text-(--neutral-0)'} hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer`}>Easy</button>
+              <button onClick={() => changeDifficulty('medium')} className={`text-[16px] leading-[120%] tracking-[-0.48px] px-2.5 py-1.5 border rounded-lg ${difficulty === 'medium' ? 'border-(--blue-400) text-(--blue-400)' : 'border-(--neutral-500) text-(--neutral-0)'} hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer`}>Medium</button>
+              <button onClick={() => changeDifficulty('hard')} className={`text-[16px] leading-[120%] tracking-[-0.48px] px-2.5 py-1.5 border rounded-lg ${difficulty === 'hard' ? 'border-(--blue-400) text-(--blue-400)' : 'border-(--neutral-500) text-(--neutral-0)'} hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer`}>Hard</button>
             </div>
             <div className='w-px h-full bg-(--neutral-700)'></div>
             <div className='flex items-center gap-1.5'>
               <p className='pr-1.5 text-[16px] leading-[120%] tracking-[-0.48px] text-(--neutral-400)'>Mode:</p>
-              <button className='text-[16px] leading-[120%] tracking-[-0.48px] text-(--blue-400) px-2.5 py-1.5 border rounded-lg border-(--blue-400) hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer'>Timed (60s)</button>
-              <button className='text-[16px] leading-[120%] tracking-[-0.48px] text-(--neutral-0) px-2.5 py-1.5 border rounded-lg border-(--neutral-500) hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer'>Passage</button>
+              <button onClick={() => changeMode('timed60')} className={`text-[16px] leading-[120%] tracking-[-0.48px] px-2.5 py-1.5 border rounded-lg ${mode === 'timed60' ? 'border-(--blue-400) text-(--blue-400)' : 'border-(--neutral-500) text-(--neutral-0)'} hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer`}>Timed (60s)</button>
+              <button onClick={() => changeMode('passage')} className={`text-[16px] leading-[120%] tracking-[-0.48px] px-2.5 py-1.5 border rounded-lg ${mode === 'passage' ? 'border-(--blue-400) text-(--blue-400)' : 'border-(--neutral-500) text-(--neutral-0)'} hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer`}>Passage</button>
             </div>
           </div>
         </div>
