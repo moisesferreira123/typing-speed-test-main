@@ -1,8 +1,11 @@
 import iconRestart from '../../assets/images/icon-restart-white.svg'
+import iconDownArrowWhite from '../../assets/images/icon-down-arrow-white.svg'
+import iconDownArrowBlue from '../../assets/images/icon-down-arrow-blue.svg'
 import { useEffect, useMemo, useRef, useState } from 'react';
 import NotStarted from '../NotStarted/NotStarted'
 import Header from '../../components/Header';
 import { useNavigate } from 'react-router-dom';
+import Dropdown from '../../components/Dropdown';
 
 function Home() {
   const [itStarted, setItStarted] = useState(false);
@@ -24,6 +27,9 @@ function Home() {
   const [difficulty, setDifficulty] = useState(sessionStorage.getItem("difficulty") || "medium");
   const [mode, setMode] = useState(sessionStorage.getItem("mode") || "timed60");
   const [text, setText] = useState('');
+  const [timedMode, setTimedMode] = useState(sessionStorage.getItem("timedMode") || "60");
+  const [hover, setHover] = useState(false);
+  const [isModeDropdown, setIsModeDropdown] = useState(false);
 
   const wpm = useMemo(() => {
     if(mode ===  "passage") {
@@ -88,8 +94,26 @@ function Home() {
   function changeMode(newMode) {
     sessionStorage.setItem("mode", newMode);
     if(newMode === "passage") setChosenTime(0);
-    else setChosenTime(newMode.slice(-2));
+
+    if(newMode === "timed15") {
+      setChosenTime(15);
+      setTimedMode(15);
+      sessionStorage.setItem("timedMode", 15);
+    } else if(newMode === "timed30") {
+      setChosenTime(30);
+      setTimedMode(30);
+      sessionStorage.setItem("timedMode", 30);
+    } else if(newMode === "timed60") {
+      setChosenTime(60);
+      setTimedMode(60);
+      sessionStorage.setItem("timedMode", 60);
+    } else if(newMode === "timed120") {
+      setChosenTime(120);
+      setTimedMode(120);
+      sessionStorage.setItem("timedMode", 120);
+    }
     setMode(newMode);
+    setIsModeDropdown(false);
   }
 
   useEffect(() => {
@@ -190,7 +214,7 @@ function Home() {
             <div className='w-px h-full bg-(--neutral-700)'></div>
             <p className='text-[20px] leading-[120%] tracking-[-0.6px] text-(--neutral-400)'>Accuracy:<span className={`font-bold leading-[100%] tracking-[0%] text-[24px] ${itStarted? (accuracy >= 90 ? (accuracy >= 95 ? 'text-(--green-500)' : 'text-(--yellow-400)') : 'text-(--red-500)') : 'text-(--neutral-0)'} ml-3`}>{accuracy}%</span></p>
             <div className='w-px h-full bg-(--neutral-700)'></div>
-            <p className='text-[20px] leading-[120%] tracking-[-0.6px] text-(--neutral-400)'>Time:<span className={`font-bold leading-[100%] tracking-[0%] text-[24px] ${itStarted? (time>=10 ? 'text-(--yellow-400)' : 'text-(--red-500)') : 'text-(--neutral-0)'} ml-3`}>{formatTime(time)}</span></p>
+            <p className='text-[20px] leading-[120%] tracking-[-0.6px] text-(--neutral-400)'>Time:<span className={`font-bold leading-[100%] tracking-[0%] text-[24px] ${itStarted && mode !== "passage"? (time>=10 ? 'text-(--yellow-400)' : 'text-(--red-500)') : 'text-(--neutral-0)'} ml-3`}>{formatTime(time)}</span></p>
           </div>
           <div className='flex h-7.75 gap-3'>
             <div className='flex gap-1.5 items-center'>
@@ -202,13 +226,36 @@ function Home() {
             <div className='w-px h-full bg-(--neutral-700)'></div>
             <div className='flex items-center gap-1.5'>
               <p className='pr-1.5 text-[16px] leading-[120%] tracking-[-0.48px] text-(--neutral-400)'>Mode:</p>
-              <button onClick={() => changeMode('timed60')} className={`text-[16px] leading-[120%] tracking-[-0.48px] px-2.5 py-1.5 border rounded-lg ${mode === 'timed60' ? 'border-(--blue-400) text-(--blue-400)' : 'border-(--neutral-500) text-(--neutral-0)'} hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer`}>Timed (60s)</button>
-              <button onClick={() => changeMode('passage')} className={`text-[16px] leading-[120%] tracking-[-0.48px] px-2.5 py-1.5 border rounded-lg ${mode === 'passage' ? 'border-(--blue-400) text-(--blue-400)' : 'border-(--neutral-500) text-(--neutral-0)'} hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer`}>Passage</button>
+              <div className='relative'>
+                <button 
+                  id="button-dropdown"
+                  onClick={() => setIsModeDropdown(isModeDropdown => !isModeDropdown)}
+                  onMouseEnter={() => setHover(true)}
+                  onMouseLeave={()=> setHover(false)}
+                  className={`flex gap-2.5  text-[16px] leading-[120%] tracking-[-0.48px] px-2.5 py-1.5 border rounded-lg ${mode !== 'passage' ? 'border-(--blue-400) text-(--blue-400)' : 'border-(--neutral-500) text-(--neutral-0)'} hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer`}
+                >
+                  <p>Timed ({`${timedMode}`}s)</p>
+                  <img 
+                    src={mode !== "passage" || hover ? iconDownArrowBlue : iconDownArrowWhite} 
+                    alt="" 
+                  />
+                </button>
+                {isModeDropdown &&
+                  <Dropdown
+                    textList={['Timed (15s)', 'Timed (30s)', 'Timed (60s)', 'Timed (120s)']}
+                    textMode = {['timed15', 'timed30', 'timed60', 'timed120']}
+                    chosenMode={mode}
+                    changeMode={changeMode}
+                    setIsModeDropdown={setIsModeDropdown}
+                  />
+                }
+              </div>
+              <button id="passage-mode" onClick={() => changeMode('passage')} className={`text-[16px] leading-[120%] tracking-[-0.48px] px-2.5 py-1.5 border rounded-lg ${mode === 'passage' ? 'border-(--blue-400) text-(--blue-400)' : 'border-(--neutral-500) text-(--neutral-0)'} hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer`}>Passage</button>
             </div>
           </div>
         </div>
         <div className={`relative ${!itStarted && 'px-1.25'}`}>
-          {!itStarted && <NotStarted startTyping={startTyping}/>}
+          {!itStarted && text !== '' && <NotStarted startTyping={startTyping}/>}
           <p className='text-[30px] leading-[136%] tracking-[0.4px] text-(--neutral-400) whitespace-pre-wrap'>
             {text.split("").map((char, index) => (
               <span key={index} 
@@ -233,3 +280,5 @@ function Home() {
 }
 
 export default Home;
+
+// TODO: Falta ajeitar a responsividade (incluindo o dropdown para mobile)
