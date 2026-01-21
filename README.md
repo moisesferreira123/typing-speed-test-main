@@ -56,7 +56,7 @@ Este projeto foi desenvolvido como um desafio do **Frontend Mentor**. O objetivo
 ## Links
 
 - Solução URL: [URL da solução](https://github.com/moisesferreira123/typing-speed-test-main)
-- Live Site URL: [Live site URL](https://moisesferreira123.github.io/typing-speed-test-main/)
+- Live Site URL: [Live site URL](https://typing-speed-test-main.vercel.app/)
 
 
 ## Construído com

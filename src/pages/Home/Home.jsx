@@ -27,7 +27,7 @@ function Home() {
   const [bestWpm, setBestWpm] = useState(localStorage.getItem("bestWpm") || 0);
   const [difficulty, setDifficulty] = useState(sessionStorage.getItem("difficulty") || "medium");
   const [mode, setMode] = useState(sessionStorage.getItem("mode") || "timed60");
-  const [text, setText] = useState('');
+  const [text, setText] = useState(`Learning a new skill takes patience and consistent practice. Whether you're studying a language, picking up an instrument, or mastering a sport, the key is to show up every day. Small improvements compound over time, and before you know it, you'll have made remarkable progress.`);
   const [timedMode, setTimedMode] = useState(sessionStorage.getItem("timedMode") || "60");
   const [hoverDifficulty, setHoverDifficulty] = useState(false);
   const [hoverMode, setHoverMode] = useState(false);
