@@ -26,3 +26,13 @@
 body {
   font-family: "Sora", sans-serif;
 }
+
+@theme {
+  --breakpoint-width-1120: 1120px;
+  --breakpoint-width-768: 768px;
+  --breakpoint-width-670: 670px;
+  --breakpoint-width-640: 640px;
+  --breakpoint-width-550: 550px;
+  --breakpoint-width-470: 470px;
+  --breakpoint-width-450: 450px;
+}

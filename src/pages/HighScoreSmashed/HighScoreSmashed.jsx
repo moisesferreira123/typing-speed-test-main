@@ -14,7 +14,7 @@ function HighScoreSmashed() {
   const bestWpm = localStorage.getItem("bestWpm");
 
   return(
-    <div className="flex flex-col items-center px-28 py-8 bg-(--neutral-900) min-h-screen gap-9 ">
+    <div className="flex flex-col items-center px-4 pt-4 pb-8 width-670:px-8 width-670:pt-8 width-670:pb-10 xl:px-28 xl:py-8 bg-(--neutral-900) min-h-screen gap-9 ">
       <Header bestWpm={bestWpm} />
       <div className="flex flex-col items-center z-5">
         <img src={iconNewPb} alt="" className="w-20 h-20 " />
@@ -28,7 +28,7 @@ function HighScoreSmashed() {
           incorrectedCharacters={incorrectedCharacters}
         />
       </div>
-      <img src={patternConfetti} alt="" className="fixed bottom-0 z-1 w-screen object-cover" />
+      <img src={patternConfetti} alt="" className="fixed bottom-0 z-1 w-screen object-cover min-h-40" />
     </div>
   );
 }

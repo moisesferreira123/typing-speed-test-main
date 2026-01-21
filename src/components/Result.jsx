@@ -10,20 +10,20 @@ function Result({ title, subtitle, textButton, wpm, accuracy, correctedCharacter
   
   return(
     <div className="flex flex-col items-center gap-8 ">
-      <div className="pt-6 flex flex-col items-center gap-2.5">
-        <h1 className="text-(--neutral-0) font-bold text-[30px] leading-[136%] tracking-[0.4px]">{title}</h1>
+      <div className="pt-6 flex flex-col items-center gap-2.5 text-center">
+        <h1 className="text-(--neutral-0) font-bold text-[24px] width-450:text-[30px] leading-[136%] tracking-[0.4px]">{title}</h1>
         <p className="text-(--neutral-400) text-[15px] leading-[120%] tracking-[-0.6px] ">{subtitle}</p>
       </div>
-      <div className="pt-5 pb-8 flex justify-center items-center gap-5">
-        <div className="px-6 py-4 flex flex-col items-start gap-3 rounded-lg border border-(--neutral-700) bg-(--neutral-900) w-40 ">
+      <div className="w-full pt-5 pb-8 flex flex-col gap-4 width-550:flex-row justify-center items-center width-550:gap-5">
+        <div className="w-full px-6 py-4 flex flex-col items-start gap-3 rounded-lg border border-(--neutral-700) bg-(--neutral-900) width-550:w-40 ">
           <p className="text-(--neutral-400) text-[16px] leading-[120%] tracking-[-0.6px] ">WPM:</p>
           <p className="font-bold text-(--neutral-0) text-[22px] leading-[100%] tracking-normal ">{wpm}</p>
         </div>
-        <div className="px-6 py-4 flex flex-col items-start gap-3 rounded-lg border border-(--neutral-700) bg-(--neutral-900) w-40 ">
+        <div className="w-full px-6 py-4 flex flex-col items-start gap-3 rounded-lg border border-(--neutral-700) bg-(--neutral-900) width-550:w-40 ">
           <p className="text-(--neutral-400) text-[16px] leading-[120%] tracking-[-0.6px] ">Accuracy:</p>
           <p className={`font-bold ${accuracy >= 90 ? (accuracy >= 95 ? 'text-(--green-500)' : 'text-(--yellow-400)') : 'text-(--red-500)' } text-[22px] leading-[100%] tracking-normal `}>{accuracy}%</p>
         </div>
-        <div className="px-6 py-4 flex flex-col items-start gap-3 rounded-lg border border-(--neutral-700) bg-(--neutral-900) w-40 ">
+        <div className="w-full px-6 py-4 flex flex-col items-start gap-3 rounded-lg border border-(--neutral-700) bg-(--neutral-900) width-550:w-40 ">
           <p className="text-(--neutral-400) text-[16px] leading-[120%] tracking-[-0.6px] ">Characters</p>
           <p className="font-bold text-(--neutral-500) text-[22px] leading-[100%] tracking-normal "><span className="text-(--green-500)">{correctedCharacters}</span>/<span className="text-(--red-500)">{incorrectedCharacters}</span></p>
         </div>

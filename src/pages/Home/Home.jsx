@@ -18,6 +18,7 @@ function Home() {
     if(mode === "timed15") return 15;
     if(mode === "timed30") return 30;
     if(mode === "timed60") return 60;
+    if(mode === "timed120") return 120;
   });
   const [time, setTime] = useState(60);
   const [wrongCharactersUncorrected, setWrongCharactersUncorrected] = useState(0);
@@ -28,8 +29,10 @@ function Home() {
   const [mode, setMode] = useState(sessionStorage.getItem("mode") || "timed60");
   const [text, setText] = useState('');
   const [timedMode, setTimedMode] = useState(sessionStorage.getItem("timedMode") || "60");
-  const [hover, setHover] = useState(false);
+  const [hoverDifficulty, setHoverDifficulty] = useState(false);
+  const [hoverMode, setHoverMode] = useState(false);
   const [isModeDropdown, setIsModeDropdown] = useState(false);
+  const [isDifficultyDropdown, setIsDifficultyDropdown] = useState(false);
 
   const wpm = useMemo(() => {
     if(mode ===  "passage") {
@@ -89,6 +92,7 @@ function Home() {
   function changeDifficulty(newDifficulty) {
     sessionStorage.setItem("difficulty", newDifficulty);
     setDifficulty(newDifficulty);
+    setIsDifficultyDropdown(false);
   } 
 
   function changeMode(newMode) {
@@ -114,6 +118,11 @@ function Home() {
     }
     setMode(newMode);
     setIsModeDropdown(false);
+  }
+
+  function formatDifficulty(difficulty) {
+    if(difficulty === "") return "";
+    return difficulty.charAt(0).toUpperCase() + difficulty.slice(1);
   }
 
   useEffect(() => {
@@ -205,18 +214,28 @@ function Home() {
   }, [itStarted, typedText, text]);
 
   return(
-    <div className="flex flex-col items-center px-28 py-8 bg-(--neutral-900) min-h-screen gap-9">
+    <div className="flex flex-col items-center px-4 pt-4 pb-8 width-670:px-8 width-670:pt-8 width-670:pb-10 xl:px-28 xl:py-8 bg-(--neutral-900) min-h-screen gap-9">
       <Header bestWpm={bestWpm} />
       <div className='flex flex-col w-full gap-6'>
-        <div className='flex justify-between items-center pb-3 border-b border-(--neutral-700)'>
-          <div className='flex h-6 gap-4'>
-            <p className='text-[20px] leading-[120%] tracking-[-0.6px] text-(--neutral-400)'>WPM:<span className='font-bold leading-[100%] tracking-[0%] text-[24px] text-(--neutral-0) ml-3'>{wpm}</span></p>
+        <div className='flex flex-col justify-start items-start gap-4 width-1120:gap-0 width-1120:flex-row width-1120:justify-between width-1120:items-center pb-4 border-b border-(--neutral-700)'>
+          <div className='w-full h-12 flex justify-around items-center gap-4 width-450:w-auto width-450:h-6 width-450:gap-4'>
+            <div className='flex flex-col justify-start items-center width-450:flex-row width-450:gap-3 text-[20px] leading-[120%] tracking-[-0.6px] text-(--neutral-400) '>
+              <p>WPM:</p>
+              <p className='font-bold leading-[100%] tracking-[0%] text-[24px] text-(--neutral-0)'>{wpm}</p>
+            </div>
             <div className='w-px h-full bg-(--neutral-700)'></div>
-            <p className='text-[20px] leading-[120%] tracking-[-0.6px] text-(--neutral-400)'>Accuracy:<span className={`font-bold leading-[100%] tracking-[0%] text-[24px] ${itStarted? (accuracy >= 90 ? (accuracy >= 95 ? 'text-(--green-500)' : 'text-(--yellow-400)') : 'text-(--red-500)') : 'text-(--neutral-0)'} ml-3`}>{accuracy}%</span></p>
+            <div className='flex flex-col justify-center items-center width-450:flex-row width-450:gap-3 text-[20px] leading-[120%] tracking-[-0.6px] text-(--neutral-400)'>
+              <p>Accuracy:</p>
+              <p className={`font-bold leading-[100%] tracking-[0%] text-[24px] ${itStarted? (accuracy >= 90 ? (accuracy >= 95 ? 'text-(--green-500)' : 'text-(--yellow-400)') : 'text-(--red-500)') : 'text-(--neutral-0)'}`}>{accuracy}%</p>
+            </div>
             <div className='w-px h-full bg-(--neutral-700)'></div>
-            <p className='text-[20px] leading-[120%] tracking-[-0.6px] text-(--neutral-400)'>Time:<span className={`font-bold leading-[100%] tracking-[0%] text-[24px] ${itStarted && mode !== "passage"? (time>=10 ? 'text-(--yellow-400)' : 'text-(--red-500)') : 'text-(--neutral-0)'} ml-3`}>{formatTime(time)}</span></p>
+            <div className='flex flex-col width-450:flex-row width-450:gap-3 text-[20px] leading-[120%] tracking-[-0.6px] text-(--neutral-400)'>
+              <p>Time:</p>
+              <p className={`font-bold leading-[100%] tracking-[0%] text-[24px] ${itStarted && mode !== "passage"? (time>=10 ? 'text-(--yellow-400)' : 'text-(--red-500)') : 'text-(--neutral-0)'}`}>{formatTime(time)}</p>
+            </div>
           </div>
-          <div className='flex h-7.75 gap-3'>
+          {/* Screen width greater than or equal to 640px*/}
+          <div className='hidden width-640:flex h-7.75 gap-3'>
             <div className='flex gap-1.5 items-center'>
               <p className='pr-2 text-[16px] leading-[120%] tracking-[-0.48px] text-(--neutral-400)'>Difficulty:</p>
               <button onClick={() => changeDifficulty('easy')} className={`text-[16px] leading-[120%] tracking-[-0.48px] px-2.5 py-1.5 border rounded-lg ${difficulty === 'easy' ? 'border-(--blue-400) text-(--blue-400)' : 'border-(--neutral-500) text-(--neutral-0)'} hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer`}>Easy</button>
@@ -228,29 +247,80 @@ function Home() {
               <p className='pr-1.5 text-[16px] leading-[120%] tracking-[-0.48px] text-(--neutral-400)'>Mode:</p>
               <div className='relative'>
                 <button 
-                  id="button-dropdown"
+                  id="button-mode-dropdown"
                   onClick={() => setIsModeDropdown(isModeDropdown => !isModeDropdown)}
-                  onMouseEnter={() => setHover(true)}
-                  onMouseLeave={()=> setHover(false)}
+                  onMouseEnter={() => setHoverMode(true)}
+                  onMouseLeave={()=> setHoverMode(false)}
                   className={`flex gap-2.5  text-[16px] leading-[120%] tracking-[-0.48px] px-2.5 py-1.5 border rounded-lg ${mode !== 'passage' ? 'border-(--blue-400) text-(--blue-400)' : 'border-(--neutral-500) text-(--neutral-0)'} hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer`}
                 >
                   <p>Timed ({`${timedMode}`}s)</p>
                   <img 
-                    src={mode !== "passage" || hover ? iconDownArrowBlue : iconDownArrowWhite} 
+                    src={mode !== "passage" || hoverMode ? iconDownArrowBlue : iconDownArrowWhite} 
                     alt="" 
                   />
                 </button>
                 {isModeDropdown &&
                   <Dropdown
                     textList={['Timed (15s)', 'Timed (30s)', 'Timed (60s)', 'Timed (120s)']}
-                    textMode = {['timed15', 'timed30', 'timed60', 'timed120']}
-                    chosenMode={mode}
-                    changeMode={changeMode}
-                    setIsModeDropdown={setIsModeDropdown}
+                    textItem = {['timed15', 'timed30', 'timed60', 'timed120']}
+                    chosenItem={mode}
+                    changeItem={changeMode}
+                    setItem={setIsModeDropdown}
                   />
                 }
               </div>
               <button id="passage-mode" onClick={() => changeMode('passage')} className={`text-[16px] leading-[120%] tracking-[-0.48px] px-2.5 py-1.5 border rounded-lg ${mode === 'passage' ? 'border-(--blue-400) text-(--blue-400)' : 'border-(--neutral-500) text-(--neutral-0)'} hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer`}>Passage</button>
+            </div>
+          </div>
+          {/*Screen width less than 640px*/}
+          <div className='grid grid-cols-2 w-full width-640:hidden h-7.75 gap-2.5'>
+            <div className='relative'>
+              <button
+                id='button-difficulty-dropdown'
+                onClick={() => setIsDifficultyDropdown(!isDifficultyDropdown)}
+                onMouseEnter={() => setHoverDifficulty(true)}
+                onMouseLeave={()=> setHoverDifficulty(false)}
+                className='w-full flex justify-center items-center py-1.5 gap-2.5 border border-(--neutral-500) rounded-lg text-(--neutral-0) hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer'
+              >
+                <p>{formatDifficulty(difficulty)}</p>
+                <img 
+                  src={hoverDifficulty ? iconDownArrowBlue : iconDownArrowWhite} 
+                  alt="" 
+                />
+              </button>
+              {isDifficultyDropdown &&
+                <Dropdown 
+                  textList={['Easy', 'Medium', 'Hard']}
+                  textItem = {['easy', 'medium', 'hard']}
+                  chosenItem={difficulty}
+                  changeItem={changeDifficulty}
+                  setItem={setIsDifficultyDropdown}
+                />
+              }
+            </div>
+            <div className='relative'>
+              <button
+              id='button-mode-dropdown-640'
+                onClick={() => setIsModeDropdown(isModeDropdown => !isModeDropdown)}
+                onMouseEnter={() => setHoverMode(true)}
+                onMouseLeave={()=> setHoverMode(false)}
+                className='w-full flex justify-center items-center py-1.5 gap-2.5 border border-(--neutral-500) rounded-lg text-(--neutral-0) hover:text-(--blue-400) hover:border-(--blue-400) hover:cursor-pointer'
+              >
+                <p>Timed ({`${timedMode}`}s)</p>
+                <img 
+                  src={hoverMode ? iconDownArrowBlue : iconDownArrowWhite} 
+                  alt="" 
+                />
+              </button>
+              {isModeDropdown &&
+                <Dropdown 
+                  textList={['Timed (15s)', 'Timed (30s)', 'Timed (60s)', 'Timed (120s)', 'Passage']}
+                  textItem = {['timed15', 'timed30', 'timed60', 'timed120', 'passage']}
+                  chosenItem={mode}
+                  changeItem={changeMode}
+                  setItem={setIsModeDropdown}
+                />
+              }
             </div>
           </div>
         </div>
@@ -280,5 +350,3 @@ function Home() {
 }
 
 export default Home;
-
-// TODO: Falta ajeitar a responsividade (incluindo o dropdown para mobile)
