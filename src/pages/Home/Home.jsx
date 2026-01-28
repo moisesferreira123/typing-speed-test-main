@@ -215,7 +215,7 @@ function Home() {
 
   return(
     <div className="flex flex-col items-center px-4 pt-4 pb-8 width-670:px-8 width-670:pt-8 width-670:pb-10 xl:px-28 xl:py-8 bg-(--neutral-900) min-h-screen gap-9">
-      <Header bestWpm={bestWpm} />
+      <Header bestWpm={bestWpm} itStarted={itStarted} hasLeaderborder={true} />
       <div className='flex flex-col w-full gap-6'>
         <div className='flex flex-col justify-start items-start gap-4 width-1120:gap-0 width-1120:flex-row width-1120:justify-between width-1120:items-center pb-4 border-b border-(--neutral-700)'>
           <div className='w-full h-12 flex justify-around items-center gap-4 width-450:w-auto width-450:h-6 width-450:gap-4'>

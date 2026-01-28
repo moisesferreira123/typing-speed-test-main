@@ -6,6 +6,7 @@ import TestComplete from './pages/TestComplete/TestComplete'
 import HighScoreSmashed from './pages/HighScoreSmashed/HighScoreSmashed'
 import BaselineEstabilished from './pages/BaselineEstabilished/BaselineEstabilished'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import Leaderboard from './pages/Leaderboard/Leaderboard'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -15,6 +16,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/test-complete" element={<TestComplete />} />
         <Route path="/high-score-smashed" element={<HighScoreSmashed />} />
         <Route path="/baseline-estabilished" element={<BaselineEstabilished />} />
+        <Route path="/leaderboard" element={<Leaderboard />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
