@@ -6,6 +6,8 @@ import NotStarted from '../NotStarted/NotStarted'
 import Header from '../../components/Header';
 import { useNavigate } from 'react-router-dom';
 import Dropdown from '../../components/Dropdown';
+import { addToRank } from '../../api/leaderboard';
+import TransitionOverlay from '../../components/TransitionOverlay';
 
 function Home() {
   const [itStarted, setItStarted] = useState(false);
@@ -33,6 +35,7 @@ function Home() {
   const [hoverMode, setHoverMode] = useState(false);
   const [isModeDropdown, setIsModeDropdown] = useState(false);
   const [isDifficultyDropdown, setIsDifficultyDropdown] = useState(false);
+  const [isTransition, setIsTransition] = useState(false);
 
   const wpm = useMemo(() => {
     if(mode ===  "passage") {
@@ -150,31 +153,49 @@ function Home() {
   }, [itStarted, time, mode]);
 
   useEffect(() => {
-    if(itStarted && (time === 0 || typedText.length === text.length) && changePage.current) {
-      if(mode === "passage" && time === 0) return;
-
-      changePage.current = false;
-
-      const query = new URLSearchParams();
-      query.set('wpm', wpm);
-      query.set('accuracy', accuracy);
-      query.set('correctedCharacters', typedCharacters-wrongCharactersTotal);
-      query.set('incorrectedCharacters', wrongCharactersTotal);
-      
-      if(wpm > bestWpm) {
-        setBestWpm(wpm);
-        localStorage.setItem("bestWpm", wpm);
-        const isFirstTime = localStorage.getItem("isFirstTime") || "true";
-        if(isFirstTime === "true") {
-          localStorage.setItem("isFirstTime", "false");
-          navigate(`/baseline-estabilished?${query.toString()}`);
-        }
-        else navigate(`/high-score-smashed?${query.toString()}`);
-      } else {
-        navigate(`/test-complete?${query.toString()}`);
+    async function registerToRank(username, accuracy, wpm) {
+      try {
+        const user = await addToRank(username, accuracy, wpm);
+        return user.id;
+      } catch(err) {
+        console.error(`Error adding user to leaderboard: ${err}`);
+        alert('Error adding user to leaderboard.');
       }
-
     }
+
+    async function handleCompletion() {
+      if(itStarted && (time === 0 || typedText.length === text.length) && changePage.current) {
+        if(mode === "passage" && time === 0) return;
+  
+        changePage.current = false;
+
+        setIsTransition(true);
+  
+        const userId = await registerToRank('temp', accuracy, wpm);
+  
+        const query = new URLSearchParams();
+        query.set('wpm', wpm);
+        query.set('accuracy', accuracy);
+        query.set('correctedCharacters', typedCharacters-wrongCharactersTotal);
+        query.set('incorrectedCharacters', wrongCharactersTotal);
+        query.set('id', userId);
+        
+        if(wpm > bestWpm) {
+          setBestWpm(wpm);
+          localStorage.setItem("bestWpm", wpm);
+          const isFirstTime = localStorage.getItem("isFirstTime") || "true";
+          if(isFirstTime === "true") {
+            localStorage.setItem("isFirstTime", "false");
+            navigate(`/baseline-estabilished?${query.toString()}`);
+          }
+          else navigate(`/high-score-smashed?${query.toString()}`);
+        } else {
+          navigate(`/test-complete?${query.toString()}`);
+        }
+      }
+    }
+
+    handleCompletion(); 
   }, [itStarted, time, wpm, mode, accuracy, typedCharacters, wrongCharactersTotal, bestWpm, text, typedText, navigate]);
 
   useEffect(() => {
@@ -215,6 +236,7 @@ function Home() {
 
   return(
     <div className="flex flex-col items-center px-4 pt-4 pb-8 width-670:px-8 width-670:pt-8 width-670:pb-10 xl:px-28 xl:py-8 bg-(--neutral-900) min-h-screen gap-9">
+      {isTransition && <TransitionOverlay />}
       <Header bestWpm={bestWpm} itStarted={itStarted} hasLeaderborder={true} />
       <div className='flex flex-col w-full gap-6'>
         <div className='flex flex-col justify-start items-start gap-4 width-1120:gap-0 width-1120:flex-row width-1120:justify-between width-1120:items-center pb-4 border-b border-(--neutral-700)'>
