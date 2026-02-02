@@ -4,7 +4,7 @@ import iconCompleted from "../../assets/images/icon-completed.svg";
 import patternStar1 from "../../assets/images/pattern-star-1.svg";
 import patternStar2 from "../../assets/images/pattern-star-2.svg";
 import { useSearchParams } from "react-router-dom";
-import { getPositionById } from "../../api/leaderboard";
+import { getPosition } from "../../api/leaderboard";
 import { useEffect, useState } from "react";
 import LeaderboardRegistrationModal from "../../components/LeaderboardRegistrationModal";
 import TransitionOverlay from "../../components/TransitionOverlay";
@@ -15,27 +15,28 @@ function TestComplete() {
   const accuracy = searchParams.get('accuracy');
   const correctedCharacters = searchParams.get('correctedCharacters');
   const incorrectedCharacters = searchParams.get('incorrectedCharacters');
-  const id = searchParams.get('id');
   
   const bestWpm = localStorage.getItem("bestWpm");
+  const date =  new Date().toISOString();
 
   const [subtitle, setSubtitle] = useState('');
   const [isTop10, setIsTop10] = useState(false);
   const [isTransition, setIsTransition] = useState(true);
   const [position, setPosition] = useState('');
-  async function getPosition(id) {
-    try {
-      const position = await getPositionById(id);
-      return position;
-    } catch(err) {
-      console.error(`Error searching for user by ID. ${err}`);
-      alert('Error searching for user by ID.');
-    }
-  }
 
   useEffect(() => {
+    async function getPos() {
+      try {
+        const position = await getPosition(wpm, accuracy, date);
+        return position;
+      } catch(err) {
+        console.error(`Error searching for user by ID. ${err}`);
+        alert('Error searching for user by ID.');
+      }
+    }
+
     async function handleGetPosition() {
-      const data = await getPosition(id);
+      const data = await getPos();
       const position = data.position;
       if(position === null) {
         setSubtitle("Keep pushing! The leaderboard is just a few words away.")
@@ -52,7 +53,7 @@ function TestComplete() {
     }
 
     handleGetPosition();
-  }, [id]);
+  }, [wpm, accuracy, date]);
 
   return(
     <div className="flex flex-col items-center px-4 pt-4 pb-8 width-670:px-8 width-670:pt-8 width-670:pb-10 xl:px-28 xl:py-8 bg-(--neutral-900) min-h-screen gap-18 width-670:gap-13">
@@ -62,7 +63,8 @@ function TestComplete() {
           <Header bestWpm={bestWpm} />
           {isTop10 && 
             <LeaderboardRegistrationModal 
-              id={id}  
+              wpm={wpm}
+              accuracy={accuracy}  
               position={position}
               description={'Another elite run! Enter your username to log this performance in the Top 10'}
               closeModal={() => setIsTop10(false)}

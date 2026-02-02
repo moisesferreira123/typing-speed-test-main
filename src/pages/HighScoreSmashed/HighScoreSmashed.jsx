@@ -4,7 +4,7 @@ import iconNewPb from "../../assets/images/icon-new-pb.svg"
 import patternConfetti from "../../assets/images/pattern-confetti.svg"
 import { useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getPositionById } from "../../api/leaderboard";
+import { getPosition } from "../../api/leaderboard";
 import TransitionOverlay from "../../components/TransitionOverlay";
 import LeaderboardRegistrationModal from "../../components/LeaderboardRegistrationModal";
 
@@ -14,25 +14,15 @@ function HighScoreSmashed() {
   const accuracy = searchParams.get('accuracy');
   const correctedCharacters = searchParams.get('correctedCharacters');
   const incorrectedCharacters = searchParams.get('incorrectedCharacters');
-  const id = searchParams.get('id'); 
 
   const bestWpm = localStorage.getItem("bestWpm");
+  const date =  new Date().toISOString();
 
   const [subtitle, setSubtitle] = useState('');
   const [description, setDescription] = useState('');
   const [isTop10, setIsTop10] = useState(false);
   const [isTransition, setIsTransition] = useState(true);
   const [position, setPosition] = useState('');
-
-  async function getPosition(id) {
-    try {
-      const position = await getPositionById(id);
-      return position;
-    } catch(err) {
-      console.error(`Error searching for user by ID. ${err}`);
-      alert('Error searching for user by ID.');
-    }
-  }
 
   function getSubtitleTop10(pos) {
     if (pos === 1) return "UNSTOPPABLE! You just shattered your record and seized the World #1 spot! You are the ultimate typing champion.";
@@ -49,26 +39,36 @@ function HighScoreSmashed() {
   }
 
   useEffect(() => {
-      async function handleGetPosition() {
-        const data = await getPosition(id);
-        const position = data.position;
-        if(position === null) {
-          setSubtitle("New Personal Best! You're getting closer to the elite with every test.")
-        } else if(position <= 10) { 
-          setIsTop10(true);
-          setSubtitle(getSubtitleTop10(position));
-          setDescription(getModalDescriptionTop10(position));
-        } else if (position <= 100) {
-          setSubtitle(`Incredible! You've crushed your record and seized Rank #${position} on the global stage!`)
-        } else {
-          setSubtitle(`You're getting faster. That was increadible typing.`)
-        }
-        setPosition(position);
-        setIsTransition(false);
+    async function getPos() {
+      try {
+        const position = await getPosition(wpm, accuracy, date);
+        return position;
+      } catch(err) {
+        console.error(`Error searching for user by ID. ${err}`);
+        alert('Error searching for user by ID.');
       }
-  
-      handleGetPosition();
-    }, [id]);
+    }
+
+    async function handleGetPosition() {
+      const data = await getPos();
+      const position = data.position;
+      if(position === null) {
+        setSubtitle("New Personal Best! You're getting closer to the elite with every test.")
+      } else if(position <= 10) { 
+        setIsTop10(true);
+        setSubtitle(getSubtitleTop10(position));
+        setDescription(getModalDescriptionTop10(position));
+      } else if (position <= 100) {
+        setSubtitle(`Incredible! You've crushed your record and seized Rank #${position} on the global stage!`)
+      } else {
+        setSubtitle(`You're getting faster. That was increadible typing.`)
+      }
+      setPosition(position);
+      setIsTransition(false);
+    }
+
+    handleGetPosition();
+  }, [wpm, accuracy, date]);
 
   return(
     <div className="flex flex-col items-center px-4 pt-4 pb-8 width-670:px-8 width-670:pt-8 width-670:pb-10 xl:px-28 xl:py-8 bg-(--neutral-900) min-h-screen gap-9 ">
@@ -78,7 +78,8 @@ function HighScoreSmashed() {
           <Header bestWpm={bestWpm} />
           {isTop10 && 
             <LeaderboardRegistrationModal 
-              id={id}
+              wpm={wpm}
+              accuracy={accuracy}
               position={position}
               description={description}
               closeModal = {() => setIsTop10(false)}

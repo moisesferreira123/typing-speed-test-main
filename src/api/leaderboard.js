@@ -15,18 +15,11 @@ export async function addToRank(username, accuracy, wpm) {
   return response.data;
 }
 
-export async function getPositionById(id) {
-  if (!id) throw new Error('ID is mandatory.');
-  
-  const response = await api.get(`/leaderboard/${id}`);
-  return response.data;
-}
-
-export async function updateUsernameById(id, username) {
-  if (!id) throw new Error('ID is mandatory.');
-
-  const response = await api.patch(`/leaderboard/${id}`, {
-    username: username
+export async function getPosition(wpm, accuracy, createdAt) {
+  const response = await api.post('/leaderboard/position', {
+    username: wpm,
+    accuracy: accuracy,
+    createdAt: createdAt
   });
 
   return response.data;

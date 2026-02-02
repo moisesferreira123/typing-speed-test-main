@@ -4,7 +4,7 @@ import iconCompleted from "../../assets/images/icon-completed.svg";
 import patternStar1 from "../../assets/images/pattern-star-1.svg";
 import patternStar2 from "../../assets/images/pattern-star-2.svg";
 import { useSearchParams } from "react-router-dom";
-import { getPositionById } from "../../api/leaderboard";
+import { getPosition } from "../../api/leaderboard";
 import { useEffect, useState } from "react";
 import TransitionOverlay from "../../components/TransitionOverlay";
 import LeaderboardRegistrationModal from "../../components/LeaderboardRegistrationModal";
@@ -15,25 +15,15 @@ function BaselineEstabilished() {
   const accuracy = searchParams.get('accuracy');
   const correctedCharacters = searchParams.get('correctedCharacters');
   const incorrectedCharacters = searchParams.get('incorrectedCharacters');
-  const id = searchParams.get('id'); 
 
   const bestWpm = localStorage.getItem("bestWpm");
+  const date =  new Date().toISOString();
 
   const [subtitle, setSubtitle] = useState('');
   const [description, setDescription] = useState('');
   const [isTop10, setIsTop10] = useState(false);
   const [isTransition, setIsTransition] = useState(true);
   const [position, setPosition] = useState('');
-
-  async function getPosition(id) {
-    try {
-      const position = await getPositionById(id);
-      return position;
-    } catch(err) {
-      console.error(`Error searching for user by ID. ${err}`);
-      alert('Error searching for user by ID.');
-    }
-  }
 
   function getSubtitleTop10(pos) {
     if (pos === 1) return "UNBELIEVABLE! On your first try, you've just dethroned everyone to become World #1. A new era of typing starts today!";
@@ -50,26 +40,36 @@ function BaselineEstabilished() {
   }
 
   useEffect(() => {
-        async function handleGetPosition() {
-          const data = await getPosition(id);
-          const position = data.position;
-          if(position === null) {
-            setSubtitle(`You've set the bar. Now the real challenge begins - time to beat it.`)
-          } else if(position <= 10) { 
-            setIsTop10(true);
-            setSubtitle(getSubtitleTop10(position));
-            setDescription(getModalDescriptionTop10(position));
-          } else if (position <= 100) {
-            setSubtitle(`What a debut! On your very first run, you've already claimed Rank #${position} worldwide. A natural-born speedster!`);
-          } else {
-            setSubtitle(`You've set the bar. Now the real challenge begins - time to beat it.`)
-          }
-          setPosition(position);
-          setIsTransition(false);
-        }
-    
-        handleGetPosition();
-      }, [id]);
+    async function getPos() {
+      try {
+        const position = await getPosition(wpm, accuracy, date);
+        return position;
+      } catch(err) {
+        console.error(`Error searching for user by ID. ${err}`);
+        alert('Error searching for user by ID.');
+      }
+    }
+
+    async function handleGetPosition() {
+      const data = await getPos();
+      const position = data.position;
+      if(position === null) {
+        setSubtitle(`You've set the bar. Now the real challenge begins - time to beat it.`)
+      } else if(position <= 10) { 
+        setIsTop10(true);
+        setSubtitle(getSubtitleTop10(position));
+        setDescription(getModalDescriptionTop10(position));
+      } else if (position <= 100) {
+        setSubtitle(`What a debut! On your very first run, you've already claimed Rank #${position} worldwide. A natural-born speedster!`);
+      } else {
+        setSubtitle(`You've set the bar. Now the real challenge begins - time to beat it.`)
+      }
+      setPosition(position);
+      setIsTransition(false);
+    }
+  
+    handleGetPosition();
+  }, [wpm, accuracy, date]);
 
   return(
     <div className="flex flex-col items-center px-4 pt-4 pb-8 width-670:px-8 width-670:pt-8 width-670:pb-10 xl:px-28 xl:py-8 bg-(--neutral-900) min-h-screen gap-18 width-670:gap-13">
@@ -79,7 +79,8 @@ function BaselineEstabilished() {
           <Header bestWpm={bestWpm} />
           {isTop10 && 
             <LeaderboardRegistrationModal 
-              id={id}
+              wpm={wpm}
+              accuracy={accuracy}
               position={position}
               description={description}
               closeModal = {() => setIsTop10(false)}

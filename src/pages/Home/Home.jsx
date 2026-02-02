@@ -6,7 +6,6 @@ import NotStarted from '../NotStarted/NotStarted'
 import Header from '../../components/Header';
 import { useNavigate } from 'react-router-dom';
 import Dropdown from '../../components/Dropdown';
-import { addToRank } from '../../api/leaderboard';
 import TransitionOverlay from '../../components/TransitionOverlay';
 
 function Home() {
@@ -153,32 +152,19 @@ function Home() {
   }, [itStarted, time, mode]);
 
   useEffect(() => {
-    async function registerToRank(username, accuracy, wpm) {
-      try {
-        const user = await addToRank(username, accuracy, wpm);
-        return user.id;
-      } catch(err) {
-        console.error(`Error adding user to leaderboard: ${err}`);
-        alert('Error adding user to leaderboard.');
-      }
-    }
-
-    async function handleCompletion() {
+    function handleCompletion() {
       if(itStarted && (time === 0 || typedText.length === text.length) && changePage.current) {
         if(mode === "passage" && time === 0) return;
   
         changePage.current = false;
 
         setIsTransition(true);
-  
-        const userId = await registerToRank('temp', accuracy, wpm);
-  
+    
         const query = new URLSearchParams();
         query.set('wpm', wpm);
         query.set('accuracy', accuracy);
         query.set('correctedCharacters', typedCharacters-wrongCharactersTotal);
         query.set('incorrectedCharacters', wrongCharactersTotal);
-        query.set('id', userId);
         
         if(wpm > bestWpm) {
           setBestWpm(wpm);

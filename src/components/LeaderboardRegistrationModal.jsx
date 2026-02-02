@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { updateUsernameById } from "../api/leaderboard";
+import { addToRank } from "../api/leaderboard";
 
-function LeaderboardRegistrationModal({ id, position, description, closeModal }) {
+function LeaderboardRegistrationModal({ wpm, accuracy, position, description, closeModal }) {
   const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [inputError, setInputError] = useState('');
@@ -80,7 +80,7 @@ function LeaderboardRegistrationModal({ id, position, description, closeModal })
     setLoading(true);
 
     try {
-      await updateUsernameById(id, username);
+      await addToRank(username, accuracy, wpm)
     } catch(err) {
       console.error(`Input invalid: ${err}`);
     } finally {
