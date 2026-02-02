@@ -1,7 +1,7 @@
 import axios from "axios";
-// https://typing-speed-test-backend-1ddt.onrender.com
+
 const api = axios.create({
-  baseURL: "http://localhost:3000",
+  baseURL: "https://typing-speed-test-backend-1ddt.onrender.com",
   timeout: 12000
 });
 
