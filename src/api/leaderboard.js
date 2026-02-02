@@ -17,7 +17,7 @@ export async function addToRank(username, accuracy, wpm) {
 
 export async function getPosition(wpm, accuracy, createdAt) {
   const response = await api.post('/leaderboard/position', {
-    username: wpm,
+    wpm: wpm,
     accuracy: accuracy,
     createdAt: createdAt
   });

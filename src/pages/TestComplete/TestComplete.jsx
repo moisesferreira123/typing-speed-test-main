@@ -17,12 +17,12 @@ function TestComplete() {
   const incorrectedCharacters = searchParams.get('incorrectedCharacters');
   
   const bestWpm = localStorage.getItem("bestWpm");
-  const date =  new Date().toISOString();
 
   const [subtitle, setSubtitle] = useState('');
   const [isTop10, setIsTop10] = useState(false);
   const [isTransition, setIsTransition] = useState(true);
   const [position, setPosition] = useState('');
+  const [date] = useState(new Date().toISOString());
 
   useEffect(() => {
     async function getPos() {
@@ -30,8 +30,8 @@ function TestComplete() {
         const position = await getPosition(wpm, accuracy, date);
         return position;
       } catch(err) {
-        console.error(`Error searching for user by ID. ${err}`);
-        alert('Error searching for user by ID.');
+        console.error(`Error searching for position. ${err}`);
+        alert('Error searching for position.');
       }
     }
 

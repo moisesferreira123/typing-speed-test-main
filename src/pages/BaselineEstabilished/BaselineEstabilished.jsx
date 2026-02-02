@@ -17,13 +17,13 @@ function BaselineEstabilished() {
   const incorrectedCharacters = searchParams.get('incorrectedCharacters');
 
   const bestWpm = localStorage.getItem("bestWpm");
-  const date =  new Date().toISOString();
 
   const [subtitle, setSubtitle] = useState('');
   const [description, setDescription] = useState('');
   const [isTop10, setIsTop10] = useState(false);
   const [isTransition, setIsTransition] = useState(true);
   const [position, setPosition] = useState('');
+  const [date] = useState(new Date().toISOString());
 
   function getSubtitleTop10(pos) {
     if (pos === 1) return "UNBELIEVABLE! On your first try, you've just dethroned everyone to become World #1. A new era of typing starts today!";
@@ -45,8 +45,8 @@ function BaselineEstabilished() {
         const position = await getPosition(wpm, accuracy, date);
         return position;
       } catch(err) {
-        console.error(`Error searching for user by ID. ${err}`);
-        alert('Error searching for user by ID.');
+        console.error(`Error searching for position. ${err}`);
+        alert('Error searching for user for position.');
       }
     }
 
