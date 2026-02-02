@@ -69,6 +69,14 @@ function LeaderboardRegistrationModal({ id, position, description, closeModal })
       return;
     }
 
+    if(username.trim().length > 16) {
+      console.log('Enter a username that is shorter than 16 characters.');
+      setInputError('Enter a username that is shorter than 16 characters.');
+      setShake(true);
+      setTimeout(() => setShake(false), 300);
+      return;
+    }
+
     setLoading(true);
 
     try {
