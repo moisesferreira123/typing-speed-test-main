@@ -7,7 +7,7 @@ import { getLeaderboard } from "../../api/leaderboard";
 import LoadingScreen from "../../components/LoadingScreen";
 
 function Leaderboard() {
-  const bestWpm = localStorage.getItem("bestWpm");
+  const bestWpm = localStorage.getItem("bestWpm") || 0;
   const navigate = useNavigate();
   
   const [leaderboard, setLeaderboard] = useState([]);
