@@ -91,3 +91,9 @@ function TestComplete() {
 }
 
 export default TestComplete;
+
+// TODO: 
+// Trocar a parte do query params, para que o usuário não possa registrar recordes só em mudar os parâmetros
+// Colocar um botão que permita o usuário não salver seu progresso no rank
+// Trocar os traversões presentes nos textos hrads por traversões normais
+// Colocar integração para poder postar seu resultados em redes sociais (whatsapp, facebook, instagram)
